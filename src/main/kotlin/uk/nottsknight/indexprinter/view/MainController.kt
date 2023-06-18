@@ -1,8 +1,13 @@
 package uk.nottsknight.indexprinter.view
 
+import javafx.print.PrintSides
+import javafx.print.PrinterJob
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDDocumentInformation
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
+import org.apache.pdfbox.printing.PDFPrintable
 import tornadofx.*
 import uk.nottsknight.indexprinter.pdf.UnitFinder
 import uk.nottsknight.indexprinter.pdf.UnitPage
@@ -55,17 +60,33 @@ class MainController : Controller() {
                 author = "IndexPrinter 1.0.0"
             }
         }
+
         PDDocument.load(indexFile.value).use { doc ->
-            for ((_, page1, page2) in selectedUnits) {
+            val outline = PDDocumentOutline()
+            var nextBookmark = 0
+
+            for ((name, page1, page2) in selectedUnits) {
                 newDoc.addPage(doc.getPage(page1 - 1))
                 newDoc.addPage(doc.getPage(page2 - 1))
-                val bookmark = PDPageFitDestination().apply {
-                    pageNumber = page1
-                    setFitBoundingBox(true)
+                val bookmark = PDOutlineItem().apply {
+                    title = name
+                    destination = PDPageFitDestination().apply {
+                        pageNumber = nextBookmark
+                        setFitBoundingBox(true)
+                    }
                 }
+                outline.addLast(bookmark)
+                nextBookmark += 2
             }
 
-            newDoc.save("reference-sheet.pdf")
+            newDoc.documentCatalog.documentOutline = outline
+            newDoc.save("test.pdf")
+        }
+
+        val printJob = PrinterJob.createPrinterJob()
+        printJob?.jobSettings?.apply {
+            printSides = PrintSides.DUPLEX
+            jobName = "index-printer"
         }
     }
 }

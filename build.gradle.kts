@@ -22,30 +22,20 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "uk.nottsknight.indexprinter.MainKt"
+    }
+    configurations["compileClasspath"].forEach { f -> from(zipTree(f.absoluteFile)) }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 kotlin {
     jvmToolchain(11)
 }
 
 javafx {
     modules("javafx.controls")
-}
-
-val fatJar = task("fatJar", type = Jar::class) {
-    archiveBaseName.value("${project.name}-fat")
-    manifest {
-        attributes["Implementation-Title"] = "WH40k Index Printer"
-        attributes["Implementation-Version"] = archiveVersion
-        attributes["Main-Class"] = "uk.nottsknight.indexprinter.MainKt"
-    }
-
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    with((tasks.jar.get() as CopySpec))
-}
-
-tasks {
-    "build" {
-        dependsOn(fatJar)
-    }
 }
 
 
