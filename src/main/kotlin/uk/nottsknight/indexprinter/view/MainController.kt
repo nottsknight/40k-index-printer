@@ -1,13 +1,10 @@
 package uk.nottsknight.indexprinter.view
 
-import javafx.print.PrintSides
-import javafx.print.PrinterJob
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDDocumentInformation
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
-import org.apache.pdfbox.printing.PDFPrintable
 import tornadofx.*
 import uk.nottsknight.indexprinter.pdf.UnitFinder
 import uk.nottsknight.indexprinter.pdf.UnitPage
@@ -21,6 +18,9 @@ class MainController : Controller() {
     private val indexFile = objectProperty<File?>()
     val indexFileName = stringProperty("No file selected")
     val units = observableListOf<UnitPage>()
+
+    private val outputFile = objectProperty<File?>(null)
+    val outputFileName = stringProperty()
 
     private val selectedUnits = mutableListOf<UnitPage>()
 
@@ -49,15 +49,20 @@ class MainController : Controller() {
         selectedUnits.addAll(selected)
     }
 
+    fun updateOutputFile(file: File) {
+        outputFile.value = file
+        outputFileName.value = file.path
+    }
+
     fun printSelectedUnits() {
-        if (indexFile.value == null) {
+        if (indexFile.value == null || outputFile.value == null) {
             return
         }
 
         val newDoc = PDDocument().apply {
             documentInformation = PDDocumentInformation().apply {
-                title = "Index Printer doc"
-                author = "IndexPrinter 1.0.0"
+                title = "Datacard reference - IndexPrinter"
+                author = "IndexPrinter 0.1.0"
             }
         }
 
@@ -80,13 +85,7 @@ class MainController : Controller() {
             }
 
             newDoc.documentCatalog.documentOutline = outline
-            newDoc.save("test.pdf")
-        }
-
-        val printJob = PrinterJob.createPrinterJob()
-        printJob?.jobSettings?.apply {
-            printSides = PrintSides.DUPLEX
-            jobName = "index-printer"
+            newDoc.save(outputFile.value)
         }
     }
 }
