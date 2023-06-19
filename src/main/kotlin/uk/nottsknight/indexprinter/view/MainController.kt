@@ -5,7 +5,9 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageFitDestination
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem
-import tornadofx.*
+import tornadofx.Controller
+import tornadofx.observableListOf
+import tornadofx.stringProperty
 import uk.nottsknight.indexprinter.pdf.UnitFinder
 import uk.nottsknight.indexprinter.pdf.UnitPage
 import uk.nottsknight.indexprinter.pdf.UnitTextStripper
@@ -15,33 +17,26 @@ class MainController : Controller() {
     private val stripper = UnitTextStripper()
     private val nameFinder = UnitFinder(stripper)
 
-    private val indexFile = objectProperty<File?>()
+    private var indexFile: File? = null
     val indexFileName = stringProperty("No file selected")
     val units = observableListOf<UnitPage>()
 
-    private val outputFile = objectProperty<File?>(null)
-    val outputFileName = stringProperty()
+    private var outputFile: File? = null
 
     private val selectedUnits = mutableListOf<UnitPage>()
 
-    init {
-        indexFile.onChange { f ->
-            if (f == null) {
-                return@onChange
-            }
-
-            val newUnits = PDDocument.load(f).use { doc ->
-                nameFinder.processDoc(doc)
-            } ?: return@onChange
-
-            units.clear()
-            units.addAll(newUnits)
-        }
-    }
+    var includeWargearOptions = false
 
     fun updateIndexFile(file: File) {
-        indexFile.value = file
+        indexFile = file
         indexFileName.value = file.name
+
+        val newUnits = PDDocument.load(file).use { doc ->
+            nameFinder.processDoc(doc)
+        } ?: return
+
+        units.clear()
+        units.addAll(newUnits)
     }
 
     fun updateSelectedUnits(selected: List<UnitPage>) {
@@ -50,12 +45,11 @@ class MainController : Controller() {
     }
 
     fun updateOutputFile(file: File) {
-        outputFile.value = file
-        outputFileName.value = file.path
+        outputFile = file
     }
 
     fun printSelectedUnits() {
-        if (indexFile.value == null || outputFile.value == null) {
+        if (indexFile == null || outputFile == null) {
             return
         }
 
@@ -66,13 +60,16 @@ class MainController : Controller() {
             }
         }
 
-        PDDocument.load(indexFile.value).use { doc ->
+        PDDocument.load(indexFile).use { doc ->
             val outline = PDDocumentOutline()
             var nextBookmark = 0
 
             for ((name, page1, page2) in selectedUnits) {
                 newDoc.addPage(doc.getPage(page1 - 1))
-                newDoc.addPage(doc.getPage(page2 - 1))
+                if (includeWargearOptions) {
+                    newDoc.addPage(doc.getPage(page2 - 1))
+                }
+
                 val bookmark = PDOutlineItem().apply {
                     title = name
                     destination = PDPageFitDestination().apply {
@@ -81,11 +78,11 @@ class MainController : Controller() {
                     }
                 }
                 outline.addLast(bookmark)
-                nextBookmark += 2
+                nextBookmark += if (includeWargearOptions) 2 else 1
             }
 
             newDoc.documentCatalog.documentOutline = outline
-            newDoc.save(outputFile.value)
+            newDoc.save(outputFile)
         }
     }
 }

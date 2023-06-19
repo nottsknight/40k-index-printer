@@ -33,14 +33,16 @@ class MainView : View() {
                     val chooser = FileChooser()
                     chooser.title = "Select index file"
                     chooser.extensionFilters.add(
-                        FileChooser.ExtensionFilter("Portable Document Format", "*.pdf")
+                        FileChooser.ExtensionFilter("PDF", "*.pdf")
                     )
                     chooser.showOpenDialog(primaryStage)?.let { f ->
                         controller.updateIndexFile(f)
                     }
                 }
             }
+
             separator(Orientation.HORIZONTAL)
+
             text(controller.indexFileName) {
                 alignment = Pos.CENTER_LEFT
             }
@@ -60,25 +62,27 @@ class MainView : View() {
 
         separator(Orientation.VERTICAL)
 
-        hbox {
-            button("Set output") {
-                action {
-                    val chooser = FileChooser()
-                    chooser.title = "Select file to save to"
-                    chooser.showSaveDialog(primaryStage)?.let { f ->
-                        controller.updateOutputFile(f)
-                    }
-                }
+        checkbox("Include unit option cards?") {
+            action {
+                controller.includeWargearOptions = isSelected
             }
-            separator(Orientation.HORIZONTAL)
-            textfield(controller.outputFileName)
         }
 
         separator(Orientation.VERTICAL)
 
-        button("Print") {
+        button("Save selected cards") {
             alignment = Pos.CENTER
-            action { controller.printSelectedUnits() }
+            action {
+                val chooser = FileChooser()
+                chooser.title = "Select file to save to"
+                chooser.extensionFilters.add(
+                    FileChooser.ExtensionFilter("PDF", "*.pdf")
+                )
+                chooser.showSaveDialog(primaryStage)?.let { f ->
+                    controller.updateOutputFile(f)
+                    controller.printSelectedUnits()
+                }
+            }
         }
 
         prefWidth = 325.0
