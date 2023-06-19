@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm") version "1.8.20"
     id("org.openjfx.javafxplugin") version "0.0.13"
+    id("dev.hydraulic.conveyor") version "1.5"
+    id("application")
 }
 
 group = "uk.nottsknight"
@@ -30,12 +32,20 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 javafx {
     modules("javafx.controls")
 }
 
-
+application {
+    mainClass.set("uk.nottsknight.indexprinter.MainKt")
+}
