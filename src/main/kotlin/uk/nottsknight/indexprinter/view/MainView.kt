@@ -62,7 +62,39 @@ class MainView : View() {
 
         separator(Orientation.VERTICAL)
 
-        checkbox("Include unit option cards?") {
+        checkbox("Include army rule?") {
+            action {
+                controller.includeArmyRule = isSelected
+            }
+        }
+
+        separator(Orientation.VERTICAL)
+
+        checkbox("Include detachment rules?") {
+            action {
+                controller.includeDetachmentRules = isSelected
+            }
+        }
+
+        separator(Orientation.VERTICAL)
+
+        checkbox("Include stratagems?") {
+            action {
+                controller.includeStratagems = isSelected
+            }
+        }
+
+        separator(Orientation.VERTICAL)
+
+        checkbox("Include enhancements?") {
+            action {
+                controller.includeEnhancements = isSelected
+            }
+        }
+
+        separator(Orientation.VERTICAL)
+
+        checkbox("Include wargear options?") {
             action {
                 controller.includeWargearOptions = isSelected
             }

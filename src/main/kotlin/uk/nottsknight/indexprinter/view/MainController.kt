@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlin
 import tornadofx.Controller
 import tornadofx.observableListOf
 import tornadofx.stringProperty
+import uk.nottsknight.indexprinter.pdf.RulesPage
 import uk.nottsknight.indexprinter.pdf.UnitFinder
 import uk.nottsknight.indexprinter.pdf.UnitPage
 import uk.nottsknight.indexprinter.pdf.UnitTextStripper
@@ -20,11 +21,16 @@ class MainController : Controller() {
     private var indexFile: File? = null
     val indexFileName = stringProperty("No file selected")
     val units = observableListOf<UnitPage>()
+    private val rulesPages = mutableListOf<RulesPage>()
 
     private var outputFile: File? = null
 
     private val selectedUnits = mutableListOf<UnitPage>()
 
+    var includeArmyRule = false
+    var includeDetachmentRules = false
+    var includeStratagems = false
+    var includeEnhancements = false
     var includeWargearOptions = false
 
     fun updateIndexFile(file: File) {
@@ -36,7 +42,9 @@ class MainController : Controller() {
         } ?: return
 
         units.clear()
-        units.addAll(newUnits)
+        units.addAll(newUnits.filterIsInstance<UnitPage>())
+        rulesPages.clear()
+        rulesPages.addAll(newUnits.filterIsInstance<RulesPage>())
     }
 
     fun updateSelectedUnits(selected: List<UnitPage>) {
@@ -63,6 +71,26 @@ class MainController : Controller() {
         PDDocument.load(indexFile).use { doc ->
             val outline = PDDocumentOutline()
             var nextBookmark = 0
+
+            for ((kind, page) in rulesPages) {
+                val newPage = doc.getPage(page - 1)
+                val bookmark = PDOutlineItem().apply {
+                    title = kind.toString()
+                    destination = PDPageFitDestination().apply {
+                        pageNumber = nextBookmark
+                        setFitBoundingBox(true)
+                    }
+                }
+                if ((includeArmyRule && kind == RulesPage.Kind.ArmyRule) ||
+                    (includeDetachmentRules && kind == RulesPage.Kind.DetachmentRule) ||
+                    (includeStratagems && kind == RulesPage.Kind.Stratagems) ||
+                    (includeEnhancements && kind == RulesPage.Kind.Enhancements)
+                ) {
+                    newDoc.addPage(newPage)
+                    outline.addLast(bookmark)
+                    ++nextBookmark
+                }
+            }
 
             for ((name, page1, page2) in selectedUnits) {
                 newDoc.addPage(doc.getPage(page1 - 1))
