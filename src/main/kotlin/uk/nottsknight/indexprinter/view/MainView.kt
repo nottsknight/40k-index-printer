@@ -21,7 +21,19 @@ private class UnitPageCell : ListCell<UnitPage>() {
     }
 }
 
-class MainView : View() {
+class IndexPrinterStyle : Stylesheet() {
+    init {
+        hidden {
+            visibility = FXVisibility.HIDDEN
+        }
+    }
+
+    companion object {
+        val hidden by cssclass()
+    }
+}
+
+class MainView : View("40k Index Printer") {
     private val controller: MainController by inject()
 
     override val root = vbox {
@@ -41,14 +53,18 @@ class MainView : View() {
                 }
             }
 
-            separator(Orientation.HORIZONTAL)
+            separator(Orientation.HORIZONTAL) {
+                addClass(IndexPrinterStyle.hidden)
+            }
 
             text(controller.indexFileName) {
                 alignment = Pos.CENTER_LEFT
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         scrollpane(fitToWidth = true, fitToHeight = true) {
             listview(controller.units) {
@@ -60,7 +76,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         checkbox("Include army rule?") {
             action {
@@ -68,7 +86,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         checkbox("Include detachment rules?") {
             action {
@@ -76,7 +96,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         checkbox("Include stratagems?") {
             action {
@@ -84,7 +106,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         checkbox("Include enhancements?") {
             action {
@@ -92,7 +116,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         checkbox("Include wargear options?") {
             action {
@@ -100,7 +126,9 @@ class MainView : View() {
             }
         }
 
-        separator(Orientation.VERTICAL)
+        separator(Orientation.VERTICAL) {
+            addClass(IndexPrinterStyle.hidden)
+        }
 
         button("Save selected cards") {
             alignment = Pos.CENTER
