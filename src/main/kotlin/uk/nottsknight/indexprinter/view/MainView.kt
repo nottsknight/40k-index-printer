@@ -21,18 +21,6 @@ private class UnitPageCell : ListCell<UnitPage>() {
     }
 }
 
-class IndexPrinterStyle : Stylesheet() {
-    init {
-        hidden {
-            visibility = FXVisibility.HIDDEN
-        }
-    }
-
-    companion object {
-        val hidden by cssclass()
-    }
-}
-
 class MainView : View("40k Index Printer") {
     private val controller: MainController by inject()
 
