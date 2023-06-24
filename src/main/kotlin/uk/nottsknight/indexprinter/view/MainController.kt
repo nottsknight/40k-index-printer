@@ -64,7 +64,7 @@ class MainController : Controller() {
         val newDoc = PDDocument().apply {
             documentInformation = PDDocumentInformation().apply {
                 title = "Datacard reference - IndexPrinter"
-                author = "IndexPrinter 0.1.0"
+                author = "IndexPrinter 0.2.0"
             }
         }
 
